@@ -1,55 +1,28 @@
 package ru.netology;
 
+import org.junit.jupiter.api.BeforeEach;
+import static com.codeborne.selenide.Selenide.open;
+import com.codeborne.selenide.SelenideElement;
+import org.junit.jupiter.api.Test;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import java.util.List;
+import static com.codeborne.selenide.Condition.exactText;
+import static com.codeborne.selenide.Selenide.$;
 
 
 public class DebitCardApplicationTest {
-    private WebDriver driver;
-
-    @BeforeAll
-    static void setUpAll() {     // драйвер для хрома
-        System.setProperty("webdriver.chorome.driver", "./driver/win/choromedriver.exe");
-        WebDriverManager.chromedriver().setup();
-    }
-
     @BeforeEach
-        // открытие хрома
-
     void setUp() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--headless");
-        driver = new ChromeDriver();
+        open("http://localhost:9999");
     }
-
-
-    @AfterEach
-    void rearDown() {
-        driver.quit();   // закрытие хрома
-        driver = null;    // обнуление данных
-    }
-
+    SelenideElement form = $("form");
     @Test
-    void shouldTestValidData() {
-        driver.get("http://localhost:9999");
-        driver.findElement(By.cssSelector("[data-test-id = name] input")).sendKeys("Николаев Александр");
-        driver.findElement(By.cssSelector("[data-test-id = phone] input")).sendKeys("+79870599950");
-        driver.findElement(By.cssSelector("[data-test-id = agreement]")).click();
-        driver.findElement(By.cssSelector("[type = button]")).click();
-        String expected = "Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время.";
-        String actual = driver.findElement(By.cssSelector("[data-test-id = order-success]")).getText().trim(); //.trim обрезает лишние пробелы в начале и конце
+    void notShouldValidData() {
 
-        Assertions.assertEquals(expected, actual);
+        form.$("[data-test-id=name] input").setValue("Николаев Иван");
+        form.$("[data-test-id=phone] input").setValue("+79380195501");
+        form.$("[data-test-id=agreement]").click();
+        form.$("[type = button]").click();
+        $("[data-test-id = order-success]").shouldHave(exactText("Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время."));
     }
-
-
 }
 
